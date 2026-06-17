@@ -78,6 +78,25 @@ function setupEventListeners() {
     
     // Textarea character count listener
     tweetTextarea.addEventListener('input', updateCharCount);
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+        // Focus search bar on pressing '/' if not already inside an input/textarea
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            searchInput.focus();
+            showToast('Search focused. Type to filter updates.', 'info');
+        }
+        // Clear search on pressing 'Esc' if search input is focused
+        if (e.key === 'Escape' && document.activeElement === searchInput) {
+            searchInput.value = '';
+            searchQuery = '';
+            toggleClearButton();
+            filterAndRenderUpdates();
+            searchInput.blur();
+            showToast('Search cleared', 'info');
+        }
+    });
 }
 
 // Show/Hide search clear button
@@ -286,6 +305,9 @@ function createCardElement(item) {
             const originalIcon = copyBtn.querySelector('svg').innerHTML;
             copyBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />`;
             
+            // Show toast message
+            showToast('Copied update text to clipboard!', 'success');
+            
             setTimeout(() => {
                 copyBtn.classList.remove('copied');
                 copyText.textContent = 'Copy';
@@ -383,9 +405,11 @@ function toggleTheme() {
     if (isLight) {
         themeIconDark.style.display = 'none';
         themeIconLight.style.display = 'block';
+        showToast('Switched to Light Mode', 'info');
     } else {
         themeIconDark.style.display = 'block';
         themeIconLight.style.display = 'none';
+        showToast('Switched to Dark Mode', 'info');
     }
 }
 
@@ -430,6 +454,7 @@ function exportToCSV() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    showToast(`Successfully exported ${filtered.length} release notes to CSV.`, 'success');
 }
 
 function escapeCSVField(val) {
@@ -437,4 +462,42 @@ function escapeCSVField(val) {
     let str = String(val);
     str = str.replace(/"/g, '""');
     return `"${str}"`;
+}
+
+// Toast Notification System Helper
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    let icon = '';
+    if (type === 'success') {
+        icon = `<svg class="btn-icon" style="color: #10b981; width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`;
+    } else if (type === 'info') {
+        icon = `<svg class="btn-icon" style="color: #3b82f6; width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+    } else {
+        icon = `<svg class="btn-icon" style="color: #ef4444; width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+    }
+    
+    toast.innerHTML = `
+        ${icon}
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (container.contains(toast)) {
+                container.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
 }

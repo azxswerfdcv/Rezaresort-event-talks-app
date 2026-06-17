@@ -13,6 +13,10 @@ const searchInput = document.getElementById('search-input');
 const clearSearchBtn = document.getElementById('clear-search-btn');
 const filterTabsContainer = document.getElementById('filter-tabs-container');
 const resetFiltersBtn = document.getElementById('reset-filters-btn');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeIconDark = document.getElementById('theme-icon-dark');
+const themeIconLight = document.getElementById('theme-icon-light');
+const exportCsvBtn = document.getElementById('export-csv-btn');
 
 // Stats Elements
 const lastUpdatedVal = document.getElementById('last-updated-val');
@@ -31,6 +35,7 @@ const closeModalBtn = document.getElementById('close-modal-btn');
 
 // Initialize the Application
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     fetchReleaseNotes();
     setupEventListeners();
 });
@@ -60,6 +65,9 @@ function setupEventListeners() {
         toggleClearButton();
         filterAndRenderUpdates();
     });
+    
+    exportCsvBtn.addEventListener('click', exportToCSV);
+    themeToggleBtn.addEventListener('click', toggleTheme);
     
     // Modal Close Listeners
     closeModalBtn.addEventListener('click', closeTweetModal);
@@ -247,6 +255,12 @@ function createCardElement(item) {
             ${item.html_content}
         </div>
         <div class="card-footer">
+            <button class="btn btn-secondary copy-btn" title="Copy plain text to clipboard">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                <span class="copy-text">Copy</span>
+            </button>
             <button class="btn btn-tweet select-tweet-btn">
                 <svg viewBox="0 0 24 24" fill="currentColor" style="width: 14px; height: 14px;">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -256,6 +270,33 @@ function createCardElement(item) {
         </div>
     `;
     
+    // Wire up Copy trigger
+    const copyBtn = card.querySelector('.copy-btn');
+    copyBtn.addEventListener('click', async () => {
+        const textToCopy = `[BigQuery Release - ${item.date}] ${item.category}:\n${item.tweet_text}`;
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            
+            // Show feedback state
+            copyBtn.classList.add('copied');
+            const copyText = copyBtn.querySelector('.copy-text');
+            copyText.textContent = 'Copied!';
+            
+            // Switch copy icon to a checkmark
+            const originalIcon = copyBtn.querySelector('svg').innerHTML;
+            copyBtn.querySelector('svg').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />`;
+            
+            setTimeout(() => {
+                copyBtn.classList.remove('copied');
+                copyText.textContent = 'Copy';
+                copyBtn.querySelector('svg').innerHTML = originalIcon;
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            alert('Failed to copy to clipboard.');
+        }
+    });
+
     // Wire up Tweet Composer trigger
     card.querySelector('.select-tweet-btn').addEventListener('click', () => {
         openTweetModal(item);
@@ -320,4 +361,80 @@ function updateCharCount() {
         postTweetBtn.style.opacity = 1;
         postTweetBtn.style.cursor = 'pointer';
     }
+}
+
+// Theme Management Functions
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeIconDark.style.display = 'none';
+        themeIconLight.style.display = 'block';
+    } else {
+        document.body.classList.remove('light-theme');
+        themeIconDark.style.display = 'block';
+        themeIconLight.style.display = 'none';
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    if (isLight) {
+        themeIconDark.style.display = 'none';
+        themeIconLight.style.display = 'block';
+    } else {
+        themeIconDark.style.display = 'block';
+        themeIconLight.style.display = 'none';
+    }
+}
+
+// Export current filtered updates to CSV
+function exportToCSV() {
+    const filtered = updates.filter(item => {
+        const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
+        const matchesSearch = searchQuery === '' || 
+            item.category.toLowerCase().includes(searchQuery) ||
+            item.date.toLowerCase().includes(searchQuery) ||
+            item.tweet_text.toLowerCase().includes(searchQuery) ||
+            item.html_content.toLowerCase().includes(searchQuery);
+        return matchesCategory && matchesSearch;
+    });
+    
+    if (filtered.length === 0) {
+        alert('No data to export.');
+        return;
+    }
+    
+    const csvRows = [];
+    csvRows.push(['Date', 'Category', 'Update Content', 'Plain Text'].map(escapeCSVField).join(','));
+    
+    filtered.forEach(item => {
+        const row = [
+            item.date,
+            item.category,
+            item.html_content,
+            item.tweet_text
+        ];
+        csvRows.push(row.map(escapeCSVField).join(','));
+    });
+    
+    const csvContent = "\ufeff" + csvRows.join('\n'); // Add BOM for Excel compatibility
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `bigquery_release_notes_${activeCategory.toLowerCase()}_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+function escapeCSVField(val) {
+    if (val === undefined || val === null) return '""';
+    let str = String(val);
+    str = str.replace(/"/g, '""');
+    return `"${str}"`;
 }

@@ -865,3 +865,172 @@ body {
         justify-content: space-between;
     }
 }
+
+/* Theme Toggle Button */
+.btn-icon-only {
+    padding: 0.75rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+}
+
+/* Filters Layout Restructuring */
+.filters-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+}
+
+.filters-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Clipboard Copy Button Styling */
+.copy-btn {
+    transition: all var(--transition-speed);
+}
+
+.copy-btn.copied {
+    background: rgba(16, 185, 129, 0.15) !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+}
+
+/* Light Theme Variable Overrides */
+body.light-theme {
+    --bg-dark: #f8fafc;
+    --bg-card: rgba(255, 255, 255, 0.8);
+    --bg-card-hover: rgba(248, 250, 252, 0.95);
+    --border-color: rgba(15, 23, 42, 0.08);
+    --border-hover: rgba(15, 23, 42, 0.16);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    
+    --category-feature-bg: rgba(16, 185, 129, 0.08);
+    --category-feature-text: #059669;
+    --category-feature-border: rgba(16, 185, 129, 0.25);
+    
+    --category-announcement-bg: rgba(59, 130, 246, 0.08);
+    --category-announcement-text: #1d4ed8;
+    --category-announcement-border: rgba(59, 130, 246, 0.25);
+    
+    --category-issue-bg: rgba(245, 158, 11, 0.08);
+    --category-issue-text: #b45309;
+    --category-issue-border: rgba(245, 158, 11, 0.25);
+    
+    --category-breaking-bg: rgba(239, 68, 68, 0.08);
+    --category-breaking-text: #b91c1c;
+    --category-breaking-border: rgba(239, 68, 68, 0.25);
+    
+    --category-change-bg: rgba(168, 85, 247, 0.08);
+    --category-change-text: #7e22ce;
+    --category-change-border: rgba(168, 85, 247, 0.25);
+    
+    --category-general-bg: rgba(100, 116, 139, 0.08);
+    --category-general-text: #475569;
+    --category-general-border: rgba(100, 116, 139, 0.25);
+}
+
+/* Light Theme Component Overrides */
+body.light-theme .bg-glow {
+    opacity: 0.04;
+}
+
+body.light-theme .logo-text h1 {
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.light-theme .logo-text h1 span {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.light-theme .status-indicator {
+    background: rgba(15, 23, 42, 0.04);
+}
+
+body.light-theme .card-body code {
+    background: rgba(15, 23, 42, 0.05);
+    color: #0f172a;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+body.light-theme .card:hover {
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+}
+
+body.light-theme .copy-btn.copied {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: #059669 !important;
+    color: #059669 !important;
+}
+
+body.light-theme .modal-container {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.15);
+}
+
+body.light-theme .modal-footer {
+    background: #f1f5f9;
+}
+
+body.light-theme .textarea-wrapper {
+    background: #f8fafc;
+}
+
+body.light-theme .btn-tweet {
+    background: #0f1419;
+    color: #fff;
+}
+
+body.light-theme .btn-tweet:hover {
+    background: #272c30;
+}
+
+body.light-theme .search-container input {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .search-container input:focus {
+    background: #ffffff;
+    border-color: var(--primary-blue);
+}
+
+body.light-theme .filter-tab {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .filter-tab:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .filter-tab.active {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: var(--primary-blue);
+    color: var(--text-primary);
+}
+
+body.light-theme .tab-badge {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .filter-tab.active .tab-badge {
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+}
+
